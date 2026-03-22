@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import DropdownSelector from '../../components/DropdownSelector/DropdownSelector';
 import MovieCard from '../../components/MovieCard/MovieCard';
-import { homeMovies } from '../../mocks/homeMovies';
+import {
+  MOVIE_CATEGORY_OPTIONS,
+  MOVIE_CATEGORIES,
+  type MovieCategory,
+} from '../../constants/movieCategories';
+import { categorizedHomeMovies } from '../../mocks/homeMovies';
 import { ROUTE_NAMES } from '../../navigation/routeNames';
 import type { RootStackParamList } from '../../types/navigation';
 import styles from './HomeScreen.styles';
@@ -11,6 +17,29 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<MovieCategory>(
+    MOVIE_CATEGORIES.NOW_PLAYING,
+  );
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+
+  const selectedCategoryLabel = useMemo(() => {
+    const matchedOption = MOVIE_CATEGORY_OPTIONS.find(
+      option => option.value === selectedCategory,
+    );
+
+    return matchedOption?.label ?? 'Now Playing';
+  }, [selectedCategory]);
+
+  const displayedMovies = categorizedHomeMovies[selectedCategory];
+
+  function handleCategoryToggle() {
+    setIsCategoryDropdownOpen(previousValue => !previousValue);
+  }
+
+  function handleCategorySelect(value: MovieCategory) {
+    setSelectedCategory(value);
+    setIsCategoryDropdownOpen(false);
+  }
 
   return (
     <ScrollView
@@ -24,14 +53,18 @@ export default function HomeScreen({ navigation }: Props) {
         <Text style={styles.logoText}>{'DB'}</Text>
       </View>
 
-      <Pressable style={styles.fieldBox}>
-        <Text style={styles.fieldLabel}>Now Playing</Text>
-        <Text style={styles.fieldArrow}>›</Text>
-      </Pressable>
+      <DropdownSelector
+        label={selectedCategoryLabel}
+        isOpen={isCategoryDropdownOpen}
+        options={MOVIE_CATEGORY_OPTIONS}
+        selectedValue={selectedCategory}
+        onToggle={handleCategoryToggle}
+        onSelect={handleCategorySelect}
+      />
 
-      <Pressable style={styles.fieldBox}>
-        <Text style={styles.fieldLabel}>Sort by</Text>
-        <Text style={styles.fieldArrow}>›</Text>
+      <Pressable style={styles.staticFieldBox}>
+        <Text style={styles.staticFieldLabel}>Sort by</Text>
+        <Text style={styles.staticFieldArrow}>›</Text>
       </Pressable>
 
       <TextInput
@@ -47,7 +80,7 @@ export default function HomeScreen({ navigation }: Props) {
       </Pressable>
 
       <View style={styles.listWrapper}>
-        {homeMovies.map(movie => (
+        {displayedMovies.map(movie => (
           <MovieCard
             key={movie.id}
             movie={movie}

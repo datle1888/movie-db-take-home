@@ -22,8 +22,8 @@ const styles = StyleSheet.create({
     color: '#7CCCB8',
     letterSpacing: 1,
   },
-  fieldBox: {
-    height: 48,
+  staticFieldBox: {
+    minHeight: 48,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -34,12 +34,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  fieldLabel: {
+  staticFieldLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: '#111827',
   },
-  fieldArrow: {
+  staticFieldArrow: {
     fontSize: 18,
     color: '#111827',
     fontWeight: '600',
