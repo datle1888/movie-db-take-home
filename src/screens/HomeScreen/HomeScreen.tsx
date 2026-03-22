@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DropdownSelector from '../../components/DropdownSelector/DropdownSelector';
 import MovieCard from '../../components/MovieCard/MovieCard';
 import {
@@ -32,6 +32,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+
   const [searchKeyword, setSearchKeyword] = useState('');
   const [submittedKeyword, setSubmittedKeyword] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<MovieCategory>(
@@ -44,11 +45,17 @@ export default function HomeScreen({ navigation }: Props) {
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [movies, setMovies] = useState<HomeMovie[]>([]);
   const [isLoadingMovies, setIsLoadingMovies] = useState(false);
+  const [isLoadingMoreMovies, setIsLoadingMoreMovies] = useState(false);
   const [moviesErrorMessage, setMoviesErrorMessage] = useState<string | null>(
     null,
   );
+  const [loadMoreErrorMessage, setLoadMoreErrorMessage] = useState<
+    string | null
+  >(null);
   const [isCategoryHydrated, setIsCategoryHydrated] = useState(false);
   const [requestNonce, setRequestNonce] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     let isMounted = true;
@@ -85,6 +92,7 @@ export default function HomeScreen({ navigation }: Props) {
   useEffect(() => {
     if (searchKeyword.trim() === '' && submittedKeyword !== '') {
       setSubmittedKeyword('');
+      setCurrentPage(1);
       setRequestNonce(previousValue => previousValue + 1);
     }
   }, [searchKeyword, submittedKeyword]);
@@ -99,13 +107,14 @@ export default function HomeScreen({ navigation }: Props) {
     async function loadMovies() {
       setIsLoadingMovies(true);
       setMoviesErrorMessage(null);
+      setLoadMoreErrorMessage(null);
 
       try {
         const normalizedKeyword = submittedKeyword.trim();
 
         const response = normalizedKeyword
-          ? await searchMovies(normalizedKeyword)
-          : await fetchMoviesByCategory(selectedCategory);
+          ? await searchMovies(normalizedKeyword, 1)
+          : await fetchMoviesByCategory(selectedCategory, 1);
 
         const mappedMovies = response.results.map(
           mapTmdbMovieListItemToHomeMovie,
@@ -113,10 +122,14 @@ export default function HomeScreen({ navigation }: Props) {
 
         if (isMounted) {
           setMovies(mappedMovies);
+          setCurrentPage(1);
+          setTotalPages(Math.max(response.total_pages || 1, 1));
         }
       } catch (error) {
         if (isMounted) {
           setMovies([]);
+          setCurrentPage(1);
+          setTotalPages(1);
 
           const normalizedKeyword = submittedKeyword.trim();
 
@@ -187,6 +200,12 @@ export default function HomeScreen({ navigation }: Props) {
 
   const hasSearchKeyword = searchKeyword.trim().length > 0;
   const isSearchMode = submittedKeyword.trim().length > 0;
+  const canLoadMore =
+    !isSearchMode &&
+    !isLoadingMovies &&
+    !moviesErrorMessage &&
+    displayedMovies.length > 0 &&
+    currentPage < totalPages;
 
   function handleCategoryToggle() {
     setIsSortDropdownOpen(false);
@@ -201,6 +220,9 @@ export default function HomeScreen({ navigation }: Props) {
   function handleCategorySelect(value: MovieCategory) {
     setSelectedCategory(value);
     setIsCategoryDropdownOpen(false);
+    setCurrentPage(1);
+    setTotalPages(1);
+    setLoadMoreErrorMessage(null);
 
     if (submittedKeyword !== '' || searchKeyword !== '') {
       setSearchKeyword('');
@@ -220,7 +242,50 @@ export default function HomeScreen({ navigation }: Props) {
     setSubmittedKeyword(normalizedKeyword);
     setIsCategoryDropdownOpen(false);
     setIsSortDropdownOpen(false);
+    setCurrentPage(1);
+    setTotalPages(1);
+    setLoadMoreErrorMessage(null);
     setRequestNonce(previousValue => previousValue + 1);
+  }
+
+  async function handleLoadMorePress() {
+    if (isLoadingMoreMovies || isLoadingMovies || isSearchMode) {
+      return;
+    }
+
+    const nextPage = currentPage + 1;
+
+    if (nextPage > totalPages) {
+      return;
+    }
+
+    setIsLoadingMoreMovies(true);
+    setLoadMoreErrorMessage(null);
+
+    try {
+      const response = await fetchMoviesByCategory(selectedCategory, nextPage);
+      const mappedMovies = response.results.map(
+        mapTmdbMovieListItemToHomeMovie,
+      );
+
+      setMovies(previousMovies => {
+        const mergedMovies = [...previousMovies, ...mappedMovies];
+        const uniqueMovies = mergedMovies.filter((movie, index, allMovies) => {
+          return allMovies.findIndex(item => item.id === movie.id) === index;
+        });
+
+        return uniqueMovies;
+      });
+
+      setCurrentPage(nextPage);
+      setTotalPages(Math.max(response.total_pages || nextPage, nextPage));
+    } catch (error) {
+      setLoadMoreErrorMessage(
+        'Unable to load more movies right now. Please try again.',
+      );
+    } finally {
+      setIsLoadingMoreMovies(false);
+    }
   }
 
   return (
@@ -336,21 +401,25 @@ export default function HomeScreen({ navigation }: Props) {
         )}
       </View>
 
-      {!isCategoryHydrated &&
-      !isLoadingMovies &&
-      !moviesErrorMessage &&
-      displayedMovies.length > 0
-        ? null
-        : null}
+      {canLoadMore ? (
+        <>
+          <Pressable
+            style={[
+              styles.loadMoreButton,
+              isLoadingMoreMovies ? styles.loadMoreButtonDisabled : null,
+            ]}
+            onPress={handleLoadMorePress}
+            disabled={isLoadingMoreMovies}
+          >
+            <Text style={styles.loadMoreButtonText}>
+              {isLoadingMoreMovies ? 'Loading More...' : 'Load More'}
+            </Text>
+          </Pressable>
 
-      {!isSearchMode &&
-      isCategoryHydrated &&
-      !isLoadingMovies &&
-      !moviesErrorMessage &&
-      displayedMovies.length > 0 ? (
-        <Pressable style={styles.loadMoreButton} onPress={() => {}}>
-          <Text style={styles.loadMoreButtonText}>Load More</Text>
-        </Pressable>
+          {loadMoreErrorMessage ? (
+            <Text style={styles.loadMoreErrorText}>{loadMoreErrorMessage}</Text>
+          ) : null}
+        </>
       ) : null}
     </ScrollView>
   );

@@ -7,7 +7,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 16,
-    paddingTop: 20,
     paddingBottom: 24,
   },
   logoWrapper: {
@@ -86,10 +85,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 8,
   },
+  loadMoreButtonDisabled: {
+    opacity: 0.7,
+  },
   loadMoreButtonText: {
     fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  loadMoreErrorText: {
+    marginTop: 10,
+    fontSize: 13,
+    lineHeight: 20,
+    color: '#B91C1C',
+    textAlign: 'center',
   },
 });
 
