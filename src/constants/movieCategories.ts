@@ -24,3 +24,13 @@ export const MOVIE_CATEGORY_OPTIONS: Array<{
     value: MOVIE_CATEGORIES.POPULAR,
   },
 ];
+
+export const MOVIE_CATEGORY_VALUES: MovieCategory[] = [
+  MOVIE_CATEGORIES.NOW_PLAYING,
+  MOVIE_CATEGORIES.UPCOMING,
+  MOVIE_CATEGORIES.POPULAR,
+];
+
+export function isMovieCategory(value: string): value is MovieCategory {
+  return MOVIE_CATEGORY_VALUES.includes(value as MovieCategory);
+}

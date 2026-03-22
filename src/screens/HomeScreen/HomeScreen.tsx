@@ -16,6 +16,10 @@ import {
 import { mapTmdbMovieListItemToHomeMovie } from '../../mappers/movieMappers';
 import { ROUTE_NAMES } from '../../navigation/routeNames';
 import { fetchMoviesByCategory } from '../../services/movies.service';
+import {
+  getStoredSelectedCategory,
+  saveSelectedCategory,
+} from '../../storage/preferencesStorage';
 import type { RootStackParamList } from '../../types/navigation';
 import type { HomeMovie } from '../../types/movie';
 import styles from './HomeScreen.styles';
@@ -38,8 +42,45 @@ export default function HomeScreen({ navigation }: Props) {
   const [moviesErrorMessage, setMoviesErrorMessage] = useState<string | null>(
     null,
   );
+  const [isCategoryHydrated, setIsCategoryHydrated] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
+    async function hydrateStoredCategory() {
+      try {
+        const storedCategory = await getStoredSelectedCategory();
+
+        if (isMounted && storedCategory) {
+          setSelectedCategory(storedCategory);
+        }
+      } finally {
+        if (isMounted) {
+          setIsCategoryHydrated(true);
+        }
+      }
+    }
+
+    hydrateStoredCategory();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isCategoryHydrated) {
+      return;
+    }
+
+    saveSelectedCategory(selectedCategory).catch(() => {});
+  }, [isCategoryHydrated, selectedCategory]);
+
+  useEffect(() => {
+    if (!isCategoryHydrated) {
+      return;
+    }
+
     let isMounted = true;
 
     async function loadMovies() {
@@ -74,7 +115,7 @@ export default function HomeScreen({ navigation }: Props) {
     return () => {
       isMounted = false;
     };
-  }, [selectedCategory]);
+  }, [isCategoryHydrated, selectedCategory]);
 
   const selectedCategoryLabel = useMemo(() => {
     const matchedOption = MOVIE_CATEGORY_OPTIONS.find(
@@ -224,7 +265,16 @@ export default function HomeScreen({ navigation }: Props) {
       </Pressable>
 
       <View style={styles.listWrapper}>
-        {isLoadingMovies ? (
+        {!isCategoryHydrated ? (
+          <View style={styles.statusCard}>
+            <Text style={styles.statusTitle}>
+              Preparing your preferences...
+            </Text>
+            <Text style={styles.statusDescription}>
+              Restoring your last selected category.
+            </Text>
+          </View>
+        ) : isLoadingMovies ? (
           <View style={styles.statusCard}>
             <Text style={styles.statusTitle}>Loading movies...</Text>
             <Text style={styles.statusDescription}>
@@ -258,7 +308,10 @@ export default function HomeScreen({ navigation }: Props) {
         )}
       </View>
 
-      {!isLoadingMovies && !moviesErrorMessage && displayedMovies.length > 0 ? (
+      {isCategoryHydrated &&
+      !isLoadingMovies &&
+      !moviesErrorMessage &&
+      displayedMovies.length > 0 ? (
         <Pressable style={styles.loadMoreButton} onPress={() => {}}>
           <Text style={styles.loadMoreButtonText}>Load More</Text>
         </Pressable>
