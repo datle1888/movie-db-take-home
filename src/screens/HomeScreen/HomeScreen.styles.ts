@@ -22,28 +22,6 @@ const styles = StyleSheet.create({
     color: '#7CCCB8',
     letterSpacing: 1,
   },
-  staticFieldBox: {
-    minHeight: 48,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  staticFieldLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  staticFieldArrow: {
-    fontSize: 18,
-    color: '#111827',
-    fontWeight: '600',
-  },
   searchInput: {
     height: 48,
     borderRadius: 8,
@@ -63,13 +41,42 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
   },
+  searchButtonActive: {
+    backgroundColor: '#58B7E3',
+  },
   searchButtonText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#6B7280',
   },
+  searchButtonTextActive: {
+    color: '#FFFFFF',
+  },
   listWrapper: {
     marginBottom: 12,
+  },
+  emptyStateCard: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  emptyStateTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 8,
+  },
+  emptyStateDescription: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#6B7280',
+    textAlign: 'center',
   },
   loadMoreButton: {
     height: 48,

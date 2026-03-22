@@ -22,6 +22,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [submittedKeyword, setSubmittedKeyword] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<MovieCategory>(
     MOVIE_CATEGORIES.NOW_PLAYING,
   );
@@ -48,29 +49,49 @@ export default function HomeScreen({ navigation }: Props) {
   }, [selectedSortOption]);
 
   const displayedMovies = useMemo(() => {
-    const movies = [...categorizedHomeMovies[selectedCategory]];
+    let movies = [...categorizedHomeMovies[selectedCategory]];
 
     switch (selectedSortOption) {
       case MOVIE_SORT_OPTIONS.RATING:
-        return movies.sort((leftMovie, rightMovie) => {
-          return rightMovie.rating - leftMovie.rating;
-        });
+        movies.sort(
+          (leftMovie, rightMovie) => rightMovie.rating - leftMovie.rating,
+        );
+        break;
 
       case MOVIE_SORT_OPTIONS.RELEASE_DATE:
-        return movies.sort((leftMovie, rightMovie) => {
-          return (
+        movies.sort(
+          (leftMovie, rightMovie) =>
             new Date(rightMovie.releaseDateValue).getTime() -
-            new Date(leftMovie.releaseDateValue).getTime()
-          );
-        });
+            new Date(leftMovie.releaseDateValue).getTime(),
+        );
+        break;
 
       case MOVIE_SORT_OPTIONS.ALPHABETICAL:
       default:
-        return movies.sort((leftMovie, rightMovie) =>
+        movies.sort((leftMovie, rightMovie) =>
           leftMovie.title.localeCompare(rightMovie.title),
         );
+        break;
     }
-  }, [selectedCategory, selectedSortOption]);
+
+    const normalizedKeyword = submittedKeyword.trim().toLowerCase();
+
+    if (!normalizedKeyword) {
+      return movies;
+    }
+
+    return movies.filter(movie => {
+      const normalizedTitle = movie.title.toLowerCase();
+      const normalizedOverview = movie.overview.toLowerCase();
+
+      return (
+        normalizedTitle.includes(normalizedKeyword) ||
+        normalizedOverview.includes(normalizedKeyword)
+      );
+    });
+  }, [selectedCategory, selectedSortOption, submittedKeyword]);
+
+  const hasSearchKeyword = searchKeyword.trim().length > 0;
 
   function handleCategoryToggle() {
     setIsSortDropdownOpen(false);
@@ -92,11 +113,18 @@ export default function HomeScreen({ navigation }: Props) {
     setIsSortDropdownOpen(false);
   }
 
+  function handleSearchPress() {
+    setSubmittedKeyword(searchKeyword.trim());
+    setIsCategoryDropdownOpen(false);
+    setIsSortDropdownOpen(false);
+  }
+
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="always"
     >
       <View style={styles.logoWrapper}>
         <Text style={styles.logoText}>{'THE'}</Text>
@@ -128,24 +156,50 @@ export default function HomeScreen({ navigation }: Props) {
         placeholder="Search..."
         placeholderTextColor="#9CA3AF"
         style={styles.searchInput}
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
+        onSubmitEditing={handleSearchPress}
       />
 
-      <Pressable style={styles.searchButton} onPress={() => {}}>
-        <Text style={styles.searchButtonText}>Search</Text>
+      <Pressable
+        style={[
+          styles.searchButton,
+          hasSearchKeyword ? styles.searchButtonActive : null,
+        ]}
+        onPress={handleSearchPress}
+      >
+        <Text
+          style={[
+            styles.searchButtonText,
+            hasSearchKeyword ? styles.searchButtonTextActive : null,
+          ]}
+        >
+          Search
+        </Text>
       </Pressable>
 
       <View style={styles.listWrapper}>
-        {displayedMovies.map(movie => (
-          <MovieCard
-            key={movie.id}
-            movie={movie}
-            onPress={() =>
-              navigation.navigate(ROUTE_NAMES.MOVIE_DETAILS, {
-                movieId: movie.id,
-              })
-            }
-          />
-        ))}
+        {displayedMovies.length > 0 ? (
+          displayedMovies.map(movie => (
+            <MovieCard
+              key={movie.id}
+              movie={movie}
+              onPress={() =>
+                navigation.navigate(ROUTE_NAMES.MOVIE_DETAILS, {
+                  movieId: movie.id,
+                })
+              }
+            />
+          ))
+        ) : (
+          <View style={styles.emptyStateCard}>
+            <Text style={styles.emptyStateTitle}>No movies found</Text>
+            <Text style={styles.emptyStateDescription}>
+              Try another keyword or switch to a different category.
+            </Text>
+          </View>
+        )}
       </View>
 
       <Pressable style={styles.loadMoreButton} onPress={() => {}}>
