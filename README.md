@@ -4,13 +4,15 @@ A React Native take-home project built with TypeScript, Redux Toolkit, AsyncStor
 
 ## Screenshots
 
-![1](docs/images/1.png)
-![2](docs/images/2.png)
-![3](docs/images/3.png)
-![4](docs/images/4.png)
-![5](docs/images/5.png)
-![6](docs/images/6.png)
-![7](docs/images/7.png)
+<p align="center">
+  <img src="docs/images/1.png" alt="1" width="250" />
+  <img src="docs/images/2.png" alt="2" width="250" />
+  <img src="docs/images/3.png" alt="3" width="250" />
+  <img src="docs/images/4.png" alt="4" width="250" />
+  <img src="docs/images/5.png" alt="5" width="250" />
+  <img src="docs/images/6.png" alt="6" width="250" />
+  <img src="docs/images/7.png" alt="7" width="250" />
+</p>
 
 This app lets users:
 
