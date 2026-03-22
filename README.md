@@ -1,8 +1,147 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# MovieDb
+
+A React Native take-home project built with TypeScript, Redux Toolkit, AsyncStorage, and TMDB API build by Danny.
+
+## Screenshots
+
+![1](docs/images/1.png)
+![2](docs/images/2.png)
+![3](docs/images/3.png)
+![4](docs/images/4.png)
+![5](docs/images/5.png)
+![6](docs/images/6.png)
+![7](docs/images/7.png)
+
+This app lets users:
+
+- browse movies by category
+- search movies
+- sort movie lists
+- view movie details
+- save movies to a watchlist
+- revisit the watchlist later with persisted local storage
+
+---
+
+## Features
+
+### Home
+
+- Browse movies by category:
+  - Now Playing
+  - Upcoming
+  - Popular
+- Persist selected category in local storage
+- Search movies using TMDB search endpoint
+- Sort movies by:
+  - alphabetical order
+  - rating
+  - release date
+- Load more movies for category browsing
+- Loading, empty, and error states
+
+### Movie Details
+
+- Movie poster
+- Title and release year
+- Release date
+- Runtime
+- Genres
+- Status
+- Original language
+- User score
+- Tagline
+- Overview
+- Director / Writer credits
+- Top billed cast
+- Recommendations
+- Add / Remove Watchlist
+
+### Watchlist
+
+- Persisted watchlist using AsyncStorage
+- Open saved movie details
+- Remove movie from watchlist
+- Local sort and order controls
+
+---
+
+## Tech Stack
+
+- React Native
+- TypeScript
+- Redux Toolkit
+- React Redux
+- React Navigation
+- AsyncStorage
+- Axios
+- TMDB API
+
+---
+
+## Architecture Overview
+
+This project uses a simple layered structure with clear separation between UI, navigation, services, mapping, storage, and state.
+
+### Architecture notes
+
+- **UI layer** handles screen rendering and user interactions
+- **Navigation layer** manages bottom tabs and nested stacks
+- **Service layer** handles TMDB API requests
+- **Mapper layer** transforms raw TMDB responses into UI-friendly models
+- **Storage layer** handles local persistence with AsyncStorage
+- **Store layer** handles global app state such as watchlist
+
+### Why this structure
+
+This keeps the UI decoupled from raw API response shapes and makes the code easier to scale, test, and maintain.
+
+---
+
+## Simple Architecture Diagram
+
+![Diagram](docs/images/diagram.png)
+
+components: reusable UI pieces
+constants: route names, storage keys, sort/category constants
+mappers: transforms API responses into UI models
+navigation: tabs and nested stack navigators
+screens: Home, Movie Details, Watchlist
+services: TMDB API client and request functions
+storage: AsyncStorage helpers
+store: Redux slices, hooks, store config
+types: shared TypeScript types
+utils: formatting helpers
 
 # Getting Started
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+> Use this setup for local development:
+
+Node.js: 18+
+npm: 9+
+Java: 17
+Xcode: installed with iOS simulator
+CocoaPods: installed and working
+Android Studio: installed with Android SDK
+Ruby: required for CocoaPods
+Watchman: recommended on macOS
+
+TMDB Setup
+
+This project uses the TMDB Read Access Token.
+
+Create the following file locally:
+
+src/config/tmdb.ts
+
+Add:
+
+export const TMDB_READ_ACCESS_TOKEN = 'YOUR_TMDB_READ_ACCESS_TOKEN';
+
+A sample file is included here:
+
+src/config/tmdb.example.ts
 
 ## Step 1: Start Metro
 
@@ -62,36 +201,10 @@ If everything is set up correctly, you should see your new app running in the An
 
 This is one way to run your app — you can also build it directly from Android Studio or Xcode.
 
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
 ## Congratulations! :tada:
 
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+You've successfully run and modified your Movie DB App. :partying_face:
 
 # Troubleshooting
 
 If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
