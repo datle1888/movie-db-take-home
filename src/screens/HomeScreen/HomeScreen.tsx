@@ -43,6 +43,7 @@ export default function HomeScreen({ navigation }: Props) {
     null,
   );
   const [isCategoryHydrated, setIsCategoryHydrated] = useState(false);
+  const [searchRequestNonce, setSearchRequestNonce] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -115,7 +116,14 @@ export default function HomeScreen({ navigation }: Props) {
     return () => {
       isMounted = false;
     };
-  }, [isCategoryHydrated, selectedCategory]);
+  }, [isCategoryHydrated, selectedCategory, searchRequestNonce]);
+
+  useEffect(() => {
+    if (searchKeyword.trim() === '' && submittedKeyword !== '') {
+      setSubmittedKeyword('');
+      setSearchRequestNonce(previousValue => previousValue + 1);
+    }
+  }, [searchKeyword, submittedKeyword]);
 
   const selectedCategoryLabel = useMemo(() => {
     const matchedOption = MOVIE_CATEGORY_OPTIONS.find(
@@ -202,6 +210,7 @@ export default function HomeScreen({ navigation }: Props) {
     setSubmittedKeyword(searchKeyword.trim());
     setIsCategoryDropdownOpen(false);
     setIsSortDropdownOpen(false);
+    setSearchRequestNonce(previousValue => previousValue + 1);
   }
 
   return (
