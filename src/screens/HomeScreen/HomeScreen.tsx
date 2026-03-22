@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DropdownSelector from '../../components/DropdownSelector/DropdownSelector';
@@ -13,9 +13,11 @@ import {
   MOVIE_SORT_OPTIONS,
   type MovieSortOption,
 } from '../../constants/movieSortOptions';
-import { categorizedHomeMovies } from '../../mocks/homeMovies';
+import { mapTmdbMovieListItemToHomeMovie } from '../../mappers/movieMappers';
 import { ROUTE_NAMES } from '../../navigation/routeNames';
+import { fetchMoviesByCategory } from '../../services/movies.service';
 import type { RootStackParamList } from '../../types/navigation';
+import type { HomeMovie } from '../../types/movie';
 import styles from './HomeScreen.styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -31,6 +33,48 @@ export default function HomeScreen({ navigation }: Props) {
   );
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const [movies, setMovies] = useState<HomeMovie[]>([]);
+  const [isLoadingMovies, setIsLoadingMovies] = useState(false);
+  const [moviesErrorMessage, setMoviesErrorMessage] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadMovies() {
+      setIsLoadingMovies(true);
+      setMoviesErrorMessage(null);
+
+      try {
+        const response = await fetchMoviesByCategory(selectedCategory);
+        const mappedMovies = response.results.map(
+          mapTmdbMovieListItemToHomeMovie,
+        );
+
+        if (isMounted) {
+          setMovies(mappedMovies);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setMovies([]);
+          setMoviesErrorMessage(
+            'Unable to load movies right now. Please check your token and network connection.',
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingMovies(false);
+        }
+      }
+    }
+
+    loadMovies();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCategory]);
 
   const selectedCategoryLabel = useMemo(() => {
     const matchedOption = MOVIE_CATEGORY_OPTIONS.find(
@@ -49,17 +93,31 @@ export default function HomeScreen({ navigation }: Props) {
   }, [selectedSortOption]);
 
   const displayedMovies = useMemo(() => {
-    let movies = [...categorizedHomeMovies[selectedCategory]];
+    const normalizedKeyword = submittedKeyword.trim().toLowerCase();
+
+    let filteredMovies = [...movies];
+
+    if (normalizedKeyword) {
+      filteredMovies = filteredMovies.filter(movie => {
+        const normalizedTitle = movie.title.toLowerCase();
+        const normalizedOverview = movie.overview.toLowerCase();
+
+        return (
+          normalizedTitle.includes(normalizedKeyword) ||
+          normalizedOverview.includes(normalizedKeyword)
+        );
+      });
+    }
 
     switch (selectedSortOption) {
       case MOVIE_SORT_OPTIONS.RATING:
-        movies.sort(
+        filteredMovies.sort(
           (leftMovie, rightMovie) => rightMovie.rating - leftMovie.rating,
         );
         break;
 
       case MOVIE_SORT_OPTIONS.RELEASE_DATE:
-        movies.sort(
+        filteredMovies.sort(
           (leftMovie, rightMovie) =>
             new Date(rightMovie.releaseDateValue).getTime() -
             new Date(leftMovie.releaseDateValue).getTime(),
@@ -68,28 +126,14 @@ export default function HomeScreen({ navigation }: Props) {
 
       case MOVIE_SORT_OPTIONS.ALPHABETICAL:
       default:
-        movies.sort((leftMovie, rightMovie) =>
+        filteredMovies.sort((leftMovie, rightMovie) =>
           leftMovie.title.localeCompare(rightMovie.title),
         );
         break;
     }
 
-    const normalizedKeyword = submittedKeyword.trim().toLowerCase();
-
-    if (!normalizedKeyword) {
-      return movies;
-    }
-
-    return movies.filter(movie => {
-      const normalizedTitle = movie.title.toLowerCase();
-      const normalizedOverview = movie.overview.toLowerCase();
-
-      return (
-        normalizedTitle.includes(normalizedKeyword) ||
-        normalizedOverview.includes(normalizedKeyword)
-      );
-    });
-  }, [selectedCategory, selectedSortOption, submittedKeyword]);
+    return filteredMovies;
+  }, [movies, selectedSortOption, submittedKeyword]);
 
   const hasSearchKeyword = searchKeyword.trim().length > 0;
 
@@ -180,7 +224,19 @@ export default function HomeScreen({ navigation }: Props) {
       </Pressable>
 
       <View style={styles.listWrapper}>
-        {displayedMovies.length > 0 ? (
+        {isLoadingMovies ? (
+          <View style={styles.statusCard}>
+            <Text style={styles.statusTitle}>Loading movies...</Text>
+            <Text style={styles.statusDescription}>
+              Please wait while we fetch the latest data from TMDB.
+            </Text>
+          </View>
+        ) : moviesErrorMessage ? (
+          <View style={styles.statusCard}>
+            <Text style={styles.statusTitle}>Something went wrong</Text>
+            <Text style={styles.statusDescription}>{moviesErrorMessage}</Text>
+          </View>
+        ) : displayedMovies.length > 0 ? (
           displayedMovies.map(movie => (
             <MovieCard
               key={movie.id}
@@ -193,18 +249,20 @@ export default function HomeScreen({ navigation }: Props) {
             />
           ))
         ) : (
-          <View style={styles.emptyStateCard}>
-            <Text style={styles.emptyStateTitle}>No movies found</Text>
-            <Text style={styles.emptyStateDescription}>
+          <View style={styles.statusCard}>
+            <Text style={styles.statusTitle}>No movies found</Text>
+            <Text style={styles.statusDescription}>
               Try another keyword or switch to a different category.
             </Text>
           </View>
         )}
       </View>
 
-      <Pressable style={styles.loadMoreButton} onPress={() => {}}>
-        <Text style={styles.loadMoreButtonText}>Load More</Text>
-      </Pressable>
+      {!isLoadingMovies && !moviesErrorMessage && displayedMovies.length > 0 ? (
+        <Pressable style={styles.loadMoreButton} onPress={() => {}}>
+          <Text style={styles.loadMoreButtonText}>Load More</Text>
+        </Pressable>
+      ) : null}
     </ScrollView>
   );
 }

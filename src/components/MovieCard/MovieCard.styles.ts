@@ -23,6 +23,8 @@ const styles = StyleSheet.create({
     height: 96,
     borderRadius: 4,
     marginRight: 12,
+  },
+  posterPlaceholder: {
     backgroundColor: '#E5E7EB',
   },
   content: {

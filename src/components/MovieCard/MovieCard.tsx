@@ -1,5 +1,5 @@
 import { Image, Pressable, Text, View } from 'react-native';
-import type { HomeMovie } from '../../mocks/homeMovies';
+import type { HomeMovie } from '../../types/movie';
 import styles from './MovieCard.styles';
 
 type MovieCardProps = {
@@ -10,7 +10,12 @@ type MovieCardProps = {
 export default function MovieCard({ movie, onPress }: MovieCardProps) {
   return (
     <Pressable style={styles.card} onPress={onPress}>
-      <Image source={{ uri: movie.posterUrl }} style={styles.poster} />
+      {movie.posterUrl ? (
+        <Image source={{ uri: movie.posterUrl }} style={styles.poster} />
+      ) : (
+        <View style={[styles.poster, styles.posterPlaceholder]} />
+      )}
+
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={1}>
           {movie.title}

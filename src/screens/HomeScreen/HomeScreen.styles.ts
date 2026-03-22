@@ -52,10 +52,7 @@ const styles = StyleSheet.create({
   searchButtonTextActive: {
     color: '#FFFFFF',
   },
-  listWrapper: {
-    marginBottom: 12,
-  },
-  emptyStateCard: {
+  statusCard: {
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -66,17 +63,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
-  emptyStateTitle: {
+  statusTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#111827',
     marginBottom: 8,
   },
-  emptyStateDescription: {
+  statusDescription: {
     fontSize: 14,
     lineHeight: 22,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  listWrapper: {
+    marginBottom: 12,
   },
   loadMoreButton: {
     height: 48,
