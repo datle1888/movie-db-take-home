@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DropdownSelector from '../../components/DropdownSelector/DropdownSelector';
 import MovieCard from '../../components/MovieCard/MovieCard';
 import {
@@ -30,6 +31,7 @@ import styles from './HomeScreen.styles';
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const [searchKeyword, setSearchKeyword] = useState('');
   const [submittedKeyword, setSubmittedKeyword] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<MovieCategory>(
@@ -224,7 +226,10 @@ export default function HomeScreen({ navigation }: Props) {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.contentContainer}
+      contentContainerStyle={[
+        styles.contentContainer,
+        { paddingTop: insets.top + 12 },
+      ]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="always"
     >
