@@ -130,6 +130,7 @@ export function mapTmdbMovieDetailsToMovieDetailsData(
       ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}`
       : null,
     releaseDateShort: formatReleaseDateShort(movie.release_date),
+    releaseDateValue: movie.release_date || '',
     runtime: formatRuntime(movie.runtime),
     genresText:
       movie.genres?.length > 0
@@ -138,6 +139,7 @@ export function mapTmdbMovieDetailsToMovieDetailsData(
     status: movie.status?.trim() || 'Unknown status',
     originalLanguage: formatOriginalLanguage(movie.original_language),
     userScore: `${Math.round(Number(movie.vote_average ?? 0) * 10)}%`,
+    ratingValue: Number(movie.vote_average ?? 0),
     tagline: movie.tagline?.trim() || 'No tagline available.',
     overview: movie.overview?.trim() || 'No overview available.',
     credits,
@@ -153,6 +155,8 @@ export function mapMovieDetailsDataToWatchlistMovie(
     id: movie.id,
     title: movie.title,
     releaseDate: movie.releaseDateShort,
+    releaseDateValue: movie.releaseDateValue,
+    rating: movie.ratingValue,
     overview: movie.overview,
     posterUrl: movie.posterUrl,
   };

@@ -54,7 +54,7 @@ export default function MainTabNavigator() {
           tabBarStyle: [
             styles.tabBar,
             {
-              height: 58 + insets.bottom,
+              height: 46 + insets.bottom,
               paddingBottom: insets.bottom,
             },
           ],
