@@ -1,5 +1,8 @@
 import type { MovieCategory } from '../constants/movieCategories';
-import type { TmdbMovieListResponse } from '../types/tmdb';
+import type {
+  TmdbMovieDetailsResponse,
+  TmdbMovieListResponse,
+} from '../types/tmdb';
 import tmdbClient from './tmdbClient';
 
 export async function fetchMoviesByCategory(
@@ -11,6 +14,16 @@ export async function fetchMoviesByCategory(
     {
       params: { page },
     },
+  );
+
+  return response.data;
+}
+
+export async function fetchMovieDetails(
+  movieId: number,
+): Promise<TmdbMovieDetailsResponse> {
+  const response = await tmdbClient.get<TmdbMovieDetailsResponse>(
+    `/movie/${movieId}`,
   );
 
   return response.data;

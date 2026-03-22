@@ -13,3 +13,22 @@ export type TmdbMovieListResponse = {
   total_pages: number;
   total_results: number;
 };
+
+export type TmdbMovieGenre = {
+  id: number;
+  name: string;
+};
+
+export type TmdbMovieDetailsResponse = {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  release_date: string;
+  runtime: number | null;
+  genres: TmdbMovieGenre[];
+  status: string;
+  original_language: string;
+  vote_average: number;
+  tagline: string;
+  overview: string;
+};
