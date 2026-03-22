@@ -32,3 +32,30 @@ export type TmdbMovieDetailsResponse = {
   tagline: string;
   overview: string;
 };
+
+export type TmdbMovieCastItem = {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+};
+
+export type TmdbMovieCrewItem = {
+  id: number;
+  name: string;
+  job: string;
+  department: string;
+};
+
+export type TmdbMovieCreditsResponse = {
+  id: number;
+  cast: TmdbMovieCastItem[];
+  crew: TmdbMovieCrewItem[];
+};
+
+export type TmdbMovieRecommendationsResponse = {
+  page: number;
+  results: TmdbMovieListItem[];
+  total_pages: number;
+  total_results: number;
+};

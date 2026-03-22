@@ -26,7 +26,7 @@ export default function AppNavigator() {
         <Stack.Screen
           name={ROUTE_NAMES.MOVIE_DETAILS}
           component={MovieDetailsScreen}
-          options={{ title: 'Movie Details' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name={ROUTE_NAMES.WATCHLIST}

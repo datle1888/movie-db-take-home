@@ -3,14 +3,19 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
   },
   contentContainer: {
-    padding: 16,
-    paddingBottom: 24,
+    paddingBottom: 32,
+  },
+  statusWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
   },
   statusCard: {
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     backgroundColor: '#FFFFFF',
@@ -18,7 +23,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 16,
   },
   statusTitle: {
     fontSize: 16,
@@ -32,76 +36,237 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
   },
-  poster: {
-    width: '100%',
-    height: 420,
-    borderRadius: 12,
-    backgroundColor: '#E5E7EB',
+  logoWrapper: {
+    alignItems: 'center',
+    paddingTop: 16,
+    paddingBottom: 12,
+    backgroundColor: '#FFFFFF',
+  },
+  logoText: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '700',
+    lineHeight: 18,
+    color: '#7CCCB8',
+    letterSpacing: 1,
+  },
+  heroSection: {
+    backgroundColor: '#58B7E3',
+    paddingTop: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  heroHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
   },
-  posterPlaceholder: {
-    width: '100%',
-    height: 420,
-    borderRadius: 12,
-    backgroundColor: '#E5E7EB',
-    marginBottom: 16,
+  backButton: {
+    paddingVertical: 4,
+    paddingRight: 12,
   },
-  title: {
+  backButtonLabel: {
+    fontSize: 28,
+    lineHeight: 28,
+    color: '#FFFFFF',
+  },
+  heroTitleWrapper: {
+    flex: 1,
+    alignItems: 'center',
+    marginRight: 28,
+  },
+  heroTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  heroTitle: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#111827',
-    marginBottom: 4,
+    color: '#FFFFFF',
+    marginRight: 6,
   },
-  year: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6B7280',
-    marginBottom: 16,
+  heroYear: {
+    fontSize: 18,
+    color: '#DDF4FF',
   },
-  metaCard: {
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 16,
-    marginBottom: 16,
+  introRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 20,
   },
-  metaRow: {
-    marginBottom: 12,
+  posterThumb: {
+    width: 112,
+    height: 150,
+    borderRadius: 6,
+    backgroundColor: '#7CC9EA',
+    marginRight: 16,
   },
-  metaRowLast: {
-    marginBottom: 0,
+  posterThumbPlaceholder: {
+    width: 112,
+    height: 150,
+    borderRadius: 6,
+    backgroundColor: '#7CC9EA',
+    marginRight: 16,
   },
-  metaLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#6B7280',
-    marginBottom: 4,
-    textTransform: 'uppercase',
+  introContent: {
+    flex: 1,
+    paddingTop: 2,
   },
-  metaValue: {
-    fontSize: 15,
+  releaseLine: {
+    fontSize: 14,
     lineHeight: 22,
-    color: '#111827',
-  },
-  sectionCard: {
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    padding: 16,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
+    color: '#EAF9FF',
     marginBottom: 8,
   },
-  sectionText: {
+  genresLine: {
     fontSize: 15,
     lineHeight: 24,
-    color: '#374151',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  metaInfoLine: {
+    fontSize: 15,
+    lineHeight: 24,
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  metaInfoLabel: {
+    fontWeight: '700',
+  },
+  scoreCreditsSection: {
+    backgroundColor: '#4FAFDB',
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+  },
+  scoreCreditsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 18,
+  },
+  scoreBlock: {
+    width: 94,
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  scoreCircleOuter: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 4,
+    borderColor: '#10324F',
+    backgroundColor: '#0E2D48',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  scoreCircleInner: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 2,
+    borderColor: '#7EE59C',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scoreValue: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  scoreLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  creditsBlock: {
+    flex: 1,
+    paddingTop: 4,
+  },
+  creditItem: {
+    marginBottom: 14,
+  },
+  creditName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  creditRole: {
+    fontSize: 14,
+    color: '#EAF9FF',
+  },
+  tagline: {
+    fontSize: 16,
+    lineHeight: 26,
+    color: '#FFFFFF',
+    fontStyle: 'italic',
+    marginBottom: 16,
+  },
+  overviewTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 10,
+  },
+  overviewText: {
+    fontSize: 16,
+    lineHeight: 26,
+    color: '#F6FDFF',
+    marginBottom: 20,
+  },
+  watchlistButton: {
+    alignSelf: 'flex-start',
+    minHeight: 42,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  watchlistButtonIcon: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    marginRight: 8,
+  },
+  watchlistButtonLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  dividerNavBar: {
+    height: 46,
+    backgroundColor: '#0E2645',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+  },
+  dividerNavIcon: {
+    fontSize: 18,
+    color: '#FFFFFF',
+  },
+  sectionContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 18,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 14,
+  },
+  horizontalList: {
+    paddingRight: 4,
+  },
+  emptySectionText: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#6B7280',
   },
 });
 
