@@ -1,20 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import CastCard from '../../components/CastCard/CastCard';
 import RecommendationCard from '../../components/RecommendationCard/RecommendationCard';
 import {
+  mapMovieDetailsDataToWatchlistMovie,
   mapTmdbCastToMovieCastMembers,
   mapTmdbCrewToMovieCredits,
   mapTmdbMovieDetailsToMovieDetailsData,
   mapTmdbRecommendationsToMovieRecommendations,
 } from '../../mappers/movieMappers';
+import { ROUTE_NAMES } from '../../navigation/routeNames';
 import {
   fetchMovieCredits,
   fetchMovieDetails,
   fetchMovieRecommendations,
 } from '../../services/movies.service';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import {
+  addMovieToWatchlist,
+  removeMovieFromWatchlist,
+} from '../../store/slices/watchlistSlice';
 import type { RootStackParamList } from '../../types/navigation';
 import type { MovieDetailsData } from '../../types/movie';
 import styles from './MovieDetailsScreen.styles';
@@ -24,6 +31,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'MovieDetails'>;
 export default function MovieDetailsScreen({ navigation, route }: Props) {
   const { movieId } = route.params;
   const insets = useSafeAreaInsets();
+  const dispatch = useAppDispatch();
+  const watchlistMovies = useAppSelector(state => state.watchlist.movies);
 
   const [movieDetails, setMovieDetails] = useState<MovieDetailsData | null>(
     null,
@@ -32,6 +41,10 @@ export default function MovieDetailsScreen({ navigation, route }: Props) {
   const [detailsErrorMessage, setDetailsErrorMessage] = useState<string | null>(
     null,
   );
+
+  const isInWatchlist = useMemo(() => {
+    return watchlistMovies.some(movie => movie.id === movieId);
+  }, [movieId, watchlistMovies]);
 
   useEffect(() => {
     let isMounted = true;
@@ -94,6 +107,21 @@ export default function MovieDetailsScreen({ navigation, route }: Props) {
       isMounted = false;
     };
   }, [movieId]);
+
+  function handleWatchlistToggle() {
+    if (!movieDetails) {
+      return;
+    }
+
+    if (isInWatchlist) {
+      dispatch(removeMovieFromWatchlist(movieDetails.id));
+      return;
+    }
+
+    dispatch(
+      addMovieToWatchlist(mapMovieDetailsDataToWatchlistMovie(movieDetails)),
+    );
+  }
 
   if (isLoadingDetails) {
     return (
@@ -220,12 +248,33 @@ export default function MovieDetailsScreen({ navigation, route }: Props) {
           <Text style={styles.overviewTitle}>Overview</Text>
           <Text style={styles.overviewText}>{movieDetails.overview}</Text>
 
-          <Pressable style={styles.watchlistButton} onPress={() => {}}>
-            <Text style={styles.watchlistButtonIcon}>▮</Text>
-            <Text style={styles.watchlistButtonLabel}>Add To Watchlist</Text>
+          <Pressable
+            style={[
+              styles.watchlistButton,
+              isInWatchlist ? styles.watchlistButtonActive : null,
+            ]}
+            onPress={handleWatchlistToggle}
+          >
+            <Text
+              style={[
+                styles.watchlistButtonIcon,
+                isInWatchlist ? styles.watchlistButtonIconActive : null,
+              ]}
+            >
+              ▮
+            </Text>
+            <Text
+              style={[
+                styles.watchlistButtonLabel,
+                isInWatchlist ? styles.watchlistButtonLabelActive : null,
+              ]}
+            >
+              {isInWatchlist ? 'Remove From Watchlist' : 'Add To Watchlist'}
+            </Text>
           </Pressable>
         </View>
       </View>
+
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Top Billed Cast</Text>
 
@@ -260,7 +309,7 @@ export default function MovieDetailsScreen({ navigation, route }: Props) {
                 key={movie.id}
                 movie={movie}
                 onPress={() =>
-                  navigation.push('MovieDetails', {
+                  navigation.push(ROUTE_NAMES.MOVIE_DETAILS, {
                     movieId: movie.id,
                   })
                 }

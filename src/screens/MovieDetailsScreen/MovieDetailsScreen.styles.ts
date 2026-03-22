@@ -228,27 +228,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  watchlistButtonActive: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#FFFFFF',
   },
   watchlistButtonIcon: {
     fontSize: 14,
     color: '#FFFFFF',
     marginRight: 8,
   },
+  watchlistButtonIconActive: {
+    color: '#2E90BD',
+  },
   watchlistButtonLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
   },
-  dividerNavBar: {
-    height: 46,
-    backgroundColor: '#0E2645',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-  },
-  dividerNavIcon: {
-    fontSize: 18,
-    color: '#FFFFFF',
+  watchlistButtonLabelActive: {
+    color: '#2E90BD',
   },
   sectionContainer: {
     paddingHorizontal: 16,

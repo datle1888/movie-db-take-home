@@ -5,6 +5,7 @@ import type {
   MovieCrewCredit,
   MovieDetailsData,
   MovieRecommendation,
+  WatchlistMovie,
 } from '../types/movie';
 import type {
   TmdbMovieCastItem,
@@ -52,7 +53,6 @@ export function mapTmdbCrewToMovieCredits(
 
   relevantCrew.forEach(member => {
     const existingCrewMember = groupedCrew.get(member.id);
-
     const normalizedRole = member.job === 'Director' ? 'Director' : 'Writer';
 
     if (existingCrewMember) {
@@ -143,5 +143,17 @@ export function mapTmdbMovieDetailsToMovieDetailsData(
     credits,
     topCast,
     recommendations,
+  };
+}
+
+export function mapMovieDetailsDataToWatchlistMovie(
+  movie: MovieDetailsData,
+): WatchlistMovie {
+  return {
+    id: movie.id,
+    title: movie.title,
+    releaseDate: movie.releaseDateShort,
+    overview: movie.overview,
+    posterUrl: movie.posterUrl,
   };
 }
