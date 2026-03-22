@@ -8,6 +8,14 @@ export type HomeMovie = {
   posterUrl: string | null;
 };
 
+export type WatchlistMovie = {
+  id: number;
+  title: string;
+  releaseDate: string;
+  overview: string;
+  posterUrl: string | null;
+};
+
 export type MovieCrewCredit = {
   id: number;
   name: string;
