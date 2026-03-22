@@ -8,6 +8,11 @@ import {
   MOVIE_CATEGORIES,
   type MovieCategory,
 } from '../../constants/movieCategories';
+import {
+  MOVIE_SORT_DROPDOWN_OPTIONS,
+  MOVIE_SORT_OPTIONS,
+  type MovieSortOption,
+} from '../../constants/movieSortOptions';
 import { categorizedHomeMovies } from '../../mocks/homeMovies';
 import { ROUTE_NAMES } from '../../navigation/routeNames';
 import type { RootStackParamList } from '../../types/navigation';
@@ -20,7 +25,11 @@ export default function HomeScreen({ navigation }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<MovieCategory>(
     MOVIE_CATEGORIES.NOW_PLAYING,
   );
+  const [selectedSortOption, setSelectedSortOption] = useState<MovieSortOption>(
+    MOVIE_SORT_OPTIONS.ALPHABETICAL,
+  );
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
   const selectedCategoryLabel = useMemo(() => {
     const matchedOption = MOVIE_CATEGORY_OPTIONS.find(
@@ -30,15 +39,57 @@ export default function HomeScreen({ navigation }: Props) {
     return matchedOption?.label ?? 'Now Playing';
   }, [selectedCategory]);
 
-  const displayedMovies = categorizedHomeMovies[selectedCategory];
+  const selectedSortLabel = useMemo(() => {
+    const matchedOption = MOVIE_SORT_DROPDOWN_OPTIONS.find(
+      option => option.value === selectedSortOption,
+    );
+
+    return matchedOption?.label ?? 'By alphabetical order';
+  }, [selectedSortOption]);
+
+  const displayedMovies = useMemo(() => {
+    const movies = [...categorizedHomeMovies[selectedCategory]];
+
+    switch (selectedSortOption) {
+      case MOVIE_SORT_OPTIONS.RATING:
+        return movies.sort((leftMovie, rightMovie) => {
+          return rightMovie.rating - leftMovie.rating;
+        });
+
+      case MOVIE_SORT_OPTIONS.RELEASE_DATE:
+        return movies.sort((leftMovie, rightMovie) => {
+          return (
+            new Date(rightMovie.releaseDateValue).getTime() -
+            new Date(leftMovie.releaseDateValue).getTime()
+          );
+        });
+
+      case MOVIE_SORT_OPTIONS.ALPHABETICAL:
+      default:
+        return movies.sort((leftMovie, rightMovie) =>
+          leftMovie.title.localeCompare(rightMovie.title),
+        );
+    }
+  }, [selectedCategory, selectedSortOption]);
 
   function handleCategoryToggle() {
+    setIsSortDropdownOpen(false);
     setIsCategoryDropdownOpen(previousValue => !previousValue);
+  }
+
+  function handleSortToggle() {
+    setIsCategoryDropdownOpen(false);
+    setIsSortDropdownOpen(previousValue => !previousValue);
   }
 
   function handleCategorySelect(value: MovieCategory) {
     setSelectedCategory(value);
     setIsCategoryDropdownOpen(false);
+  }
+
+  function handleSortSelect(value: MovieSortOption) {
+    setSelectedSortOption(value);
+    setIsSortDropdownOpen(false);
   }
 
   return (
@@ -62,10 +113,14 @@ export default function HomeScreen({ navigation }: Props) {
         onSelect={handleCategorySelect}
       />
 
-      <Pressable style={styles.staticFieldBox}>
-        <Text style={styles.staticFieldLabel}>Sort by</Text>
-        <Text style={styles.staticFieldArrow}>›</Text>
-      </Pressable>
+      <DropdownSelector
+        label={selectedSortLabel}
+        isOpen={isSortDropdownOpen}
+        options={MOVIE_SORT_DROPDOWN_OPTIONS}
+        selectedValue={selectedSortOption}
+        onToggle={handleSortToggle}
+        onSelect={handleSortSelect}
+      />
 
       <TextInput
         value={searchKeyword}
