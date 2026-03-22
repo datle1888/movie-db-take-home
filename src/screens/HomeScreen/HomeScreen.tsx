@@ -15,7 +15,10 @@ import {
 } from '../../constants/movieSortOptions';
 import { mapTmdbMovieListItemToHomeMovie } from '../../mappers/movieMappers';
 import { ROUTE_NAMES } from '../../navigation/routeNames';
-import { fetchMoviesByCategory } from '../../services/movies.service';
+import {
+  fetchMoviesByCategory,
+  searchMovies,
+} from '../../services/movies.service';
 import {
   getStoredSelectedCategory,
   saveSelectedCategory,
@@ -43,7 +46,7 @@ export default function HomeScreen({ navigation }: Props) {
     null,
   );
   const [isCategoryHydrated, setIsCategoryHydrated] = useState(false);
-  const [searchRequestNonce, setSearchRequestNonce] = useState(0);
+  const [requestNonce, setRequestNonce] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -78,6 +81,13 @@ export default function HomeScreen({ navigation }: Props) {
   }, [isCategoryHydrated, selectedCategory]);
 
   useEffect(() => {
+    if (searchKeyword.trim() === '' && submittedKeyword !== '') {
+      setSubmittedKeyword('');
+      setRequestNonce(previousValue => previousValue + 1);
+    }
+  }, [searchKeyword, submittedKeyword]);
+
+  useEffect(() => {
     if (!isCategoryHydrated) {
       return;
     }
@@ -89,7 +99,12 @@ export default function HomeScreen({ navigation }: Props) {
       setMoviesErrorMessage(null);
 
       try {
-        const response = await fetchMoviesByCategory(selectedCategory);
+        const normalizedKeyword = submittedKeyword.trim();
+
+        const response = normalizedKeyword
+          ? await searchMovies(normalizedKeyword)
+          : await fetchMoviesByCategory(selectedCategory);
+
         const mappedMovies = response.results.map(
           mapTmdbMovieListItemToHomeMovie,
         );
@@ -100,8 +115,13 @@ export default function HomeScreen({ navigation }: Props) {
       } catch (error) {
         if (isMounted) {
           setMovies([]);
+
+          const normalizedKeyword = submittedKeyword.trim();
+
           setMoviesErrorMessage(
-            'Unable to load movies right now. Please check your token and network connection.',
+            normalizedKeyword
+              ? 'Unable to search movies right now. Please try again.'
+              : 'Unable to load movies right now. Please check your token and network connection.',
           );
         }
       } finally {
@@ -116,14 +136,7 @@ export default function HomeScreen({ navigation }: Props) {
     return () => {
       isMounted = false;
     };
-  }, [isCategoryHydrated, selectedCategory, searchRequestNonce]);
-
-  useEffect(() => {
-    if (searchKeyword.trim() === '' && submittedKeyword !== '') {
-      setSubmittedKeyword('');
-      setSearchRequestNonce(previousValue => previousValue + 1);
-    }
-  }, [searchKeyword, submittedKeyword]);
+  }, [isCategoryHydrated, selectedCategory, submittedKeyword, requestNonce]);
 
   const selectedCategoryLabel = useMemo(() => {
     const matchedOption = MOVIE_CATEGORY_OPTIONS.find(
@@ -142,31 +155,17 @@ export default function HomeScreen({ navigation }: Props) {
   }, [selectedSortOption]);
 
   const displayedMovies = useMemo(() => {
-    const normalizedKeyword = submittedKeyword.trim().toLowerCase();
-
-    let filteredMovies = [...movies];
-
-    if (normalizedKeyword) {
-      filteredMovies = filteredMovies.filter(movie => {
-        const normalizedTitle = movie.title.toLowerCase();
-        const normalizedOverview = movie.overview.toLowerCase();
-
-        return (
-          normalizedTitle.includes(normalizedKeyword) ||
-          normalizedOverview.includes(normalizedKeyword)
-        );
-      });
-    }
+    const sortedMovies = [...movies];
 
     switch (selectedSortOption) {
       case MOVIE_SORT_OPTIONS.RATING:
-        filteredMovies.sort(
+        sortedMovies.sort(
           (leftMovie, rightMovie) => rightMovie.rating - leftMovie.rating,
         );
         break;
 
       case MOVIE_SORT_OPTIONS.RELEASE_DATE:
-        filteredMovies.sort(
+        sortedMovies.sort(
           (leftMovie, rightMovie) =>
             new Date(rightMovie.releaseDateValue).getTime() -
             new Date(leftMovie.releaseDateValue).getTime(),
@@ -175,16 +174,17 @@ export default function HomeScreen({ navigation }: Props) {
 
       case MOVIE_SORT_OPTIONS.ALPHABETICAL:
       default:
-        filteredMovies.sort((leftMovie, rightMovie) =>
+        sortedMovies.sort((leftMovie, rightMovie) =>
           leftMovie.title.localeCompare(rightMovie.title),
         );
         break;
     }
 
-    return filteredMovies;
-  }, [movies, selectedSortOption, submittedKeyword]);
+    return sortedMovies;
+  }, [movies, selectedSortOption]);
 
   const hasSearchKeyword = searchKeyword.trim().length > 0;
+  const isSearchMode = submittedKeyword.trim().length > 0;
 
   function handleCategoryToggle() {
     setIsSortDropdownOpen(false);
@@ -199,6 +199,12 @@ export default function HomeScreen({ navigation }: Props) {
   function handleCategorySelect(value: MovieCategory) {
     setSelectedCategory(value);
     setIsCategoryDropdownOpen(false);
+
+    if (submittedKeyword !== '' || searchKeyword !== '') {
+      setSearchKeyword('');
+      setSubmittedKeyword('');
+      setRequestNonce(previousValue => previousValue + 1);
+    }
   }
 
   function handleSortSelect(value: MovieSortOption) {
@@ -207,10 +213,12 @@ export default function HomeScreen({ navigation }: Props) {
   }
 
   function handleSearchPress() {
-    setSubmittedKeyword(searchKeyword.trim());
+    const normalizedKeyword = searchKeyword.trim();
+
+    setSubmittedKeyword(normalizedKeyword);
     setIsCategoryDropdownOpen(false);
     setIsSortDropdownOpen(false);
-    setSearchRequestNonce(previousValue => previousValue + 1);
+    setRequestNonce(previousValue => previousValue + 1);
   }
 
   return (
@@ -285,9 +293,13 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         ) : isLoadingMovies ? (
           <View style={styles.statusCard}>
-            <Text style={styles.statusTitle}>Loading movies...</Text>
+            <Text style={styles.statusTitle}>
+              {isSearchMode ? 'Searching movies...' : 'Loading movies...'}
+            </Text>
             <Text style={styles.statusDescription}>
-              Please wait while we fetch the latest data from TMDB.
+              {isSearchMode
+                ? 'Please wait while we search TMDB for matching movies.'
+                : 'Please wait while we fetch the latest data from TMDB.'}
             </Text>
           </View>
         ) : moviesErrorMessage ? (
@@ -311,13 +323,23 @@ export default function HomeScreen({ navigation }: Props) {
           <View style={styles.statusCard}>
             <Text style={styles.statusTitle}>No movies found</Text>
             <Text style={styles.statusDescription}>
-              Try another keyword or switch to a different category.
+              {isSearchMode
+                ? 'Try another keyword or clear the search box to return to category browsing.'
+                : 'No movies are available for this category right now.'}
             </Text>
           </View>
         )}
       </View>
 
-      {isCategoryHydrated &&
+      {!isCategoryHydrated &&
+      !isLoadingMovies &&
+      !moviesErrorMessage &&
+      displayedMovies.length > 0
+        ? null
+        : null}
+
+      {!isSearchMode &&
+      isCategoryHydrated &&
       !isLoadingMovies &&
       !moviesErrorMessage &&
       displayedMovies.length > 0 ? (

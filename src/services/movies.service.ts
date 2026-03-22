@@ -21,6 +21,24 @@ export async function fetchMoviesByCategory(
   return response.data;
 }
 
+export async function searchMovies(
+  query: string,
+  page = 1,
+): Promise<TmdbMovieListResponse> {
+  const response = await tmdbClient.get<TmdbMovieListResponse>(
+    '/search/movie',
+    {
+      params: {
+        query,
+        page,
+        include_adult: false,
+      },
+    },
+  );
+
+  return response.data;
+}
+
 export async function fetchMovieDetails(
   movieId: number,
 ): Promise<TmdbMovieDetailsResponse> {
